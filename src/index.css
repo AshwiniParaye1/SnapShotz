@@ -11,6 +11,171 @@ body {
   text-align: center;
   padding: 8px;
   transition: background-color 0.3s ease-in-out;
+  @import url("https://fonts.googleapis.com/css2?family=Lugrasimo&display=swap");
+
+  body {
+    font-family: "Lugrasimo", sans-serif;
+    text-align: center;
+    width: 300px;
+    padding: 10px;
+  }
+
+  /* Container Animation */
+  .container {
+    text-align: center;
+    padding: 8px;
+    transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out;
+    border: 1px solid;
+  }
+
+  .container:hover {
+    transform: scale(1.02);
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Title Fade-in Animation */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .title {
+    color: rgb(252, 27, 252);
+    animation: fadeIn 0.8s ease-in-out;
+  }
+
+  /* Theme Modes */
+  .light-mode {
+    background-color: #ffffff;
+    color: #333;
+  }
+
+  .dark-mode {
+    background-color: #1e1e1e;
+    color: #fff;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+  }
+
+  /* Window Control Dots */
+  .control-dots {
+    display: flex;
+    gap: 8px;
+  }
+
+  .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+  }
+
+  .red {
+    background-color: #ff5f57;
+  }
+
+  .yellow {
+    background-color: #ffbd2e;
+  }
+
+  .green {
+    background-color: #28c840;
+  }
+
+  /* Theme Toggle Animation */
+  .theme-toggle {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    transition: transform 0.3s ease-in-out;
+  }
+
+  .theme-toggle:hover {
+    transform: rotate(20deg);
+  }
+
+  /* Icon Button Ripple Effect */
+  .icon-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .icon-button::after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.2);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    border-radius: 50%;
+    transition: transform 0.3s ease-out;
+  }
+
+  .icon-button:active::after {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+  }
+
+  /* Screenshot Preview Animation */
+  @keyframes popIn {
+    from {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .screenshot-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+    animation: popIn 0.5s ease-out;
+  }
+
+  .screenshot-img {
+    max-width: 90%;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    background-color: white;
+  }
+
+  /* Download Link Hover Effect */
+  .download-link {
+    display: block;
+    margin-top: 10px;
+    text-decoration: none;
+    color: rgb(219, 25, 219);
+    font-weight: bold;
+    font-size: 18px;
+    transition: text-decoration 0.3s ease-in-out;
+  }
+
+  .download-link:hover {
+    transform: scale(1.1);
+    text-decoration: none;
+  }
+
   border: 1px solid;
 }
 
@@ -77,6 +242,11 @@ body {
   width: 50px;
   height: 50px;
   margin-bottom: 10px;
+  transition: transform 0.3s ease-in-out;
+}
+
+.icon-img:hover {
+  transform: scale(1.2);
 }
 
 .screenshot-preview {
