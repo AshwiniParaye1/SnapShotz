@@ -114,7 +114,7 @@ function App() {
         </button>
       </div>
 
-      <h3>SnapShotz</h3>
+      <h2 className="title">SnapShotz</h2>
 
       <button
         onClick={captureVisible}
