@@ -8,8 +8,8 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
 
   const playClickSound = () => {
-    const audio = new Audio("/sounds/click.mp3"); // Add this file inside public/sounds/
-    audio.volume = 0.2; // Set volume to a subtle level
+    const audio = new Audio("/sounds/click.mp3");
+    audio.volume = 0.2;
     audio.play();
   };
 
@@ -36,25 +36,30 @@ function App() {
   };
 
   return (
-    <div style={{ padding: "10px", width: "250px", textAlign: "center" }}>
+    <div className="container">
       <h3>SnapShotz</h3>
-      <button onClick={captureVisible} disabled={isLoading}>
-        {isLoading ? "Capturing..." : "Capture Visible"}
+
+      <button
+        onClick={captureVisible}
+        disabled={isLoading}
+        className="icon-button"
+      >
+        <img
+          src="/icons/icon1.png"
+          alt="Capture Screenshot"
+          className="icon-img"
+        />
       </button>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && <p className="error-text">{error}</p>}
 
       {screenshot && (
-        <div style={{ marginTop: "10px" }}>
-          <img
-            src={screenshot}
-            alt="Screenshot"
-            style={{ width: "100%", marginTop: "10px" }}
-          />
+        <div className="screenshot-preview">
+          <img src={screenshot} alt="Screenshot" className="screenshot-img" />
           <a
             href={screenshot}
             download="screenshot.png"
-            style={{ display: "block", marginTop: "5px" }}
+            className="download-link"
           >
             Download
           </a>

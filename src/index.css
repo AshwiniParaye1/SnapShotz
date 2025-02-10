@@ -4,7 +4,7 @@ body {
   background: #ffffff;
   color: #333;
   text-align: center;
-  padding: 20px;
+  padding: 10px;
   width: 280px;
   user-select: none;
   animation: fadeIn 0.5s ease-in-out;
@@ -18,34 +18,36 @@ h3 {
   color: #222;
 }
 
-/* Button Styling */
-button {
-  background: linear-gradient(135deg, #4caf50, #2e7d32);
-  color: white;
+/* Icon Button */
+.icon-button {
+  background: none;
   border: none;
-  padding: 12px 18px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: bold;
   cursor: pointer;
-  outline: none;
+  padding: 10px;
+  border-radius: 50%;
   transition: transform 0.2s, box-shadow 0.2s;
-  width: 100%;
-  margin-bottom: 10px;
 }
 
-button:hover {
-  background: linear-gradient(135deg, #43a047, #1b5e20);
-  transform: scale(1.05);
-  box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+.icon-button:hover {
+  transform: scale(1.1);
 }
 
-button:active {
+.icon-button:active {
   transform: scale(0.95);
 }
 
+/* Icon Image */
+.icon-img {
+  width: 50px;
+  height: 50px;
+}
+
 /* Screenshot Preview */
-img {
+.screenshot-preview {
+  margin-top: 10px;
+}
+
+.screenshot-img {
   width: 100%;
   border-radius: 5px;
   margin-top: 10px;
@@ -53,12 +55,25 @@ img {
   transition: opacity 0.3s ease-in-out;
 }
 
-img:hover {
+.screenshot-img:hover {
   opacity: 0.9;
 }
 
+/* Download Link */
+.download-link {
+  display: block;
+  margin-top: 5px;
+  color: rgb(223, 14, 223);
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.download-link:hover {
+  color: #2e7d32;
+}
+
 /* Error Message */
-p {
+.error-text {
   color: red;
   font-size: 14px;
   margin-top: 10px;
