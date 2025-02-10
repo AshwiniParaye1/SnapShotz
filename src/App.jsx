@@ -4,53 +4,55 @@ import { useState } from "react";
 
 function App() {
   const [screenshot, setScreenshot] = useState(null);
-  const [fullPageImages, setFullPageImages] = useState([]);
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const captureVisible = () => {
-    chrome.runtime.sendMessage({ action: "capture_visible" }, (response) => {
-      setScreenshot(response.screenshotUrl);
-    });
-  };
+  const captureVisible = async () => {
+    try {
+      setError(null);
+      setIsLoading(true);
 
-  const captureFullPage = () => {
-    chrome.runtime.sendMessage({ action: "capture_full_page" }, (response) => {
-      setFullPageImages(response.screenshots);
-    });
+      const response = await new Promise((resolve) => {
+        chrome.runtime.sendMessage({ action: "capture_visible" }, resolve);
+      });
+
+      if (response?.error) {
+        setError(response.error);
+      } else if (response?.screenshotUrl) {
+        setScreenshot(response.screenshotUrl);
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div style={{ padding: "10px", width: "250px", textAlign: "center" }}>
-      <h3>Screenshot Tool</h3>
-      <button onClick={captureVisible}>Capture Visible</button>
-      <button onClick={captureFullPage} style={{ marginTop: "10px" }}>
-        Capture Full Page
+      <h3>SnapShotz</h3>
+      <button onClick={captureVisible} disabled={isLoading}>
+        {isLoading ? "Capturing..." : "Capture Visible"}
       </button>
 
+      {error && <p style={{ color: "red" }}>{error}</p>}
+
       {screenshot && (
-        <>
+        <div style={{ marginTop: "10px" }}>
+          <h4>Visible Area Screenshot</h4>
           <img
             src={screenshot}
             alt="Screenshot"
             style={{ width: "100%", marginTop: "10px" }}
           />
-          <a href={screenshot} download="screenshot.png">
+          <a
+            href={screenshot}
+            download="screenshot.png"
+            style={{ display: "block", marginTop: "5px" }}
+          >
             Download
           </a>
-        </>
-      )}
-
-      {fullPageImages.length > 0 && (
-        <>
-          <h4>Full Page Screenshots</h4>
-          {fullPageImages.map((img, index) => (
-            <div key={index} style={{ marginBottom: "10px" }}>
-              <img src={img} alt={`Part ${index}`} style={{ width: "100%" }} />
-              <a href={img} download={`screenshot_part_${index}.png`}>
-                Download Part {index + 1}
-              </a>
-            </div>
-          ))}
-        </>
+        </div>
       )}
     </div>
   );

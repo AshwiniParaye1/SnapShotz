@@ -2,20 +2,15 @@
   "manifest_version": 3,
   "name": "SnapShotz",
   "version": "1.0",
-  "description": "Capture full-page and visible-area screenshots",
+  "description": "Capture visible area screenshots",
   "permissions": ["activeTab", "scripting", "downloads"],
   "host_permissions": ["<all_urls>"],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
   "action": {
     "default_popup": "index.html",
-    "default_icon": "/icons/icon2.png"
-  },
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["content.js"]
-    }
-  ]
+    "default_icon": "/icons/icon3.png"
+  }
 }

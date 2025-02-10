@@ -1,7 +1,8 @@
 /* global chrome */
 
-chrome.runtime.onMessage.addListener((message) => {
-  if (message.scrollY !== undefined) {
-    window.scrollTo(0, message.scrollY);
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === "ping") {
+    sendResponse("pong");
+    return false;
   }
 });
