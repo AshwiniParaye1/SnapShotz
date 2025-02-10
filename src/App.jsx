@@ -1,5 +1,4 @@
 /* global chrome */
-
 import { useState, useRef } from "react";
 
 function App() {
@@ -29,7 +28,14 @@ function App() {
         setError(response.error);
       } else if (response?.screenshotUrl) {
         setScreenshot(response.screenshotUrl);
-        setTimeout(() => applyOverlay(response.screenshotUrl), 100);
+
+        // Ensure image is fully loaded before applying overlay
+        const img = new Image();
+        img.crossOrigin = "Anonymous";
+        img.src = response.screenshotUrl;
+        img.onload = () => {
+          applyOverlay(response.screenshotUrl);
+        };
       }
     } catch (err) {
       setError(err.message);
@@ -44,41 +50,50 @@ function App() {
 
     const ctx = canvas.getContext("2d");
     const img = new Image();
+    img.crossOrigin = "Anonymous"; // Prevents CORS issues
     img.src = imageUrl;
-    img.onload = () => {
-      // Set canvas dimensions
-      canvas.width = img.width;
-      canvas.height = img.height + 40; // Extra space for header
 
-      // Draw background
+    img.onload = () => {
+      const padding = 20; // Padding around the screenshot
+      const headerHeight = 40;
+
+      // Set canvas dimensions correctly
+      canvas.width = img.width + padding * 2;
+      canvas.height = img.height + headerHeight + padding * 2;
+
+      // Clear canvas before drawing
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Set background color based on theme
       ctx.fillStyle = isDarkMode ? "#2b2b2b" : "#f3f3f3";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Draw header
-      ctx.fillStyle = "#333";
-      ctx.fillRect(0, 0, canvas.width, 40);
+      // Draw header with control dots
+      ctx.fillStyle = isDarkMode ? "#444" : "#ddd";
+      ctx.fillRect(padding, padding, img.width, headerHeight);
 
-      // Draw control dots
-      ctx.fillStyle = "#ff5f57"; // Red
-      ctx.beginPath();
-      ctx.arc(20, 20, 6, 0, Math.PI * 2);
-      ctx.fill();
+      // Draw control dots (Mac-style window controls)
+      const dotY = padding + headerHeight / 2;
+      const dotSpacing = 20;
+      const colors = ["#ff5f57", "#ffbd2e", "#28c840"]; // Red, Yellow, Green
 
-      ctx.fillStyle = "#ffbd2e"; // Yellow
-      ctx.beginPath();
-      ctx.arc(40, 20, 6, 0, Math.PI * 2);
-      ctx.fill();
+      colors.forEach((color, index) => {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(padding + dotSpacing * (index + 1), dotY, 6, 0, Math.PI * 2);
+        ctx.fill();
+      });
 
-      ctx.fillStyle = "#28c840"; // Green
-      ctx.beginPath();
-      ctx.arc(60, 20, 6, 0, Math.PI * 2);
-      ctx.fill();
+      // Draw the screenshot below the header with padding
+      ctx.drawImage(img, padding, padding + headerHeight);
 
-      // Draw the screenshot below the header
-      ctx.drawImage(img, 0, 40);
-
-      // Update the screenshot preview
+      // Update the screenshot preview with the new image
       setScreenshot(canvas.toDataURL("image/png"));
+    };
+
+    img.onerror = () => {
+      console.error("Failed to load image for overlay.");
+      setError("Failed to apply overlay. Try again.");
     };
   };
 
@@ -95,7 +110,7 @@ function App() {
           className="theme-toggle"
           onClick={() => setIsDarkMode(!isDarkMode)}
         >
-          {isDarkMode ? "☀️" : "🌙"}
+          {isDarkMode ? "🌙" : "☀️"}
         </button>
       </div>
 
