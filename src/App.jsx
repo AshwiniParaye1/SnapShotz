@@ -7,7 +7,14 @@ function App() {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  const playClickSound = () => {
+    const audio = new Audio("/sounds/click.mp3"); // Add this file inside public/sounds/
+    audio.volume = 0.2; // Set volume to a subtle level
+    audio.play();
+  };
+
   const captureVisible = async () => {
+    playClickSound();
     try {
       setError(null);
       setIsLoading(true);
@@ -39,7 +46,6 @@ function App() {
 
       {screenshot && (
         <div style={{ marginTop: "10px" }}>
-          <h4>Visible Area Screenshot</h4>
           <img
             src={screenshot}
             alt="Screenshot"
