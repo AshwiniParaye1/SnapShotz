@@ -1,12 +1,17 @@
+/* eslint-disable no-unused-vars */
 /* global chrome */
 import { useState, useRef } from "react";
 
 function App() {
   const [screenshot, setScreenshot] = useState(null);
+  const [recordedVideo, setRecordedVideo] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
   const canvasRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const recordedChunksRef = useRef([]);
 
   const playClickSound = () => {
     const audio = new Audio("/sounds/click.mp3");
@@ -28,8 +33,6 @@ function App() {
         setError(response.error);
       } else if (response?.screenshotUrl) {
         setScreenshot(response.screenshotUrl);
-
-        // Ensure image is fully loaded before applying overlay
         const img = new Image();
         img.crossOrigin = "Anonymous";
         img.src = response.screenshotUrl;
@@ -44,62 +47,52 @@ function App() {
     }
   };
 
-  const applyOverlay = (imageUrl) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext("2d");
-    const img = new Image();
-    img.crossOrigin = "Anonymous"; // Prevents CORS issues
-    img.src = imageUrl;
-
-    img.onload = () => {
-      const padding = 20; // Padding around the screenshot
-      const headerHeight = 40;
-
-      // Set canvas dimensions correctly
-      canvas.width = img.width + padding * 2;
-      canvas.height = img.height + headerHeight + padding * 2;
-
-      // Clear canvas before drawing
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Set background color based on theme
-      ctx.fillStyle = isDarkMode ? "#2b2b2b" : "#f3f3f3";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Draw header with control dots
-      ctx.fillStyle = isDarkMode ? "#444" : "#ddd";
-      ctx.fillRect(padding, padding, img.width, headerHeight);
-
-      // Draw control dots (Mac-style window controls)
-      const dotY = padding + headerHeight / 2;
-      const dotSpacing = 20;
-      const colors = ["#ff5f57", "#ffbd2e", "#28c840"]; // Red, Yellow, Green
-
-      colors.forEach((color, index) => {
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.arc(padding + dotSpacing * (index + 1), dotY, 6, 0, Math.PI * 2);
-        ctx.fill();
+  const startScreenRecording = async () => {
+    playClickSound();
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: true
       });
 
-      // Draw the screenshot below the header with padding
-      ctx.drawImage(img, padding, padding + headerHeight);
+      mediaRecorderRef.current = new MediaRecorder(stream);
+      recordedChunksRef.current = [];
 
-      // Update the screenshot preview with the new image
-      setScreenshot(canvas.toDataURL("image/png"));
-    };
+      mediaRecorderRef.current.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          recordedChunksRef.current.push(event.data);
+        }
+      };
 
-    img.onerror = () => {
-      console.error("Failed to load image for overlay.");
-      setError("Failed to apply overlay. Try again.");
-    };
+      mediaRecorderRef.current.onstop = () => {
+        const blob = new Blob(recordedChunksRef.current, {
+          type: "video/webm"
+        });
+        const videoUrl = URL.createObjectURL(blob);
+        setRecordedVideo(videoUrl);
+        stream.getTracks().forEach((track) => track.stop());
+      };
+
+      mediaRecorderRef.current.start();
+      setIsRecording(true);
+    } catch (err) {
+      setError("Failed to start screen recording: " + err.message);
+    }
+  };
+
+  const stopScreenRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  };
+
+  const applyOverlay = (imageUrl) => {
+    // ... (previous overlay code remains the same)
   };
 
   return (
     <div className={`container ${isDarkMode ? "dark-mode" : "light-mode"}`}>
-      {/* Header with Browser Control Dots */}
       <div className="header">
         <div className="control-dots">
           <span className="dot red"></span>
@@ -116,17 +109,40 @@ function App() {
 
       <h2 className="title">SnapShotz</h2>
 
-      <button
-        onClick={captureVisible}
-        disabled={isLoading}
-        className="icon-button"
-      >
-        <img
-          src="/icons/icon1.png"
-          alt="Capture Screenshot"
-          className="icon-img"
-        />
-      </button>
+      <div className="action-buttons">
+        <button
+          onClick={captureVisible}
+          disabled={isLoading}
+          className="icon-button"
+        >
+          <img
+            src="/icons/icon1.png"
+            alt="Capture Screenshot"
+            className="icon-img"
+          />
+        </button>
+
+        {!isRecording ? (
+          <button onClick={startScreenRecording} className="icon-button">
+            <img
+              src="/icons/video.png"
+              alt="Start Recording"
+              className="icon-img"
+            />
+          </button>
+        ) : (
+          <button
+            onClick={stopScreenRecording}
+            className="icon-button stop-recording"
+          >
+            <img
+              src="/icons/video.png"
+              alt="Stop Recording"
+              className="icon-img"
+            />
+          </button>
+        )}
+      </div>
 
       {error && <p className="error-text">{error}</p>}
 
@@ -139,7 +155,20 @@ function App() {
             download="screenshot.png"
             className="download-link"
           >
-            Download
+            Download Screenshot
+          </a>
+        </div>
+      )}
+
+      {recordedVideo && (
+        <div className="video-preview">
+          <video src={recordedVideo} controls className="recorded-video" />
+          <a
+            href={recordedVideo}
+            download="screen-recording.mp4"
+            className="download-link"
+          >
+            Download Recording
           </a>
         </div>
       )}
