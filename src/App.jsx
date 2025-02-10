@@ -76,7 +76,7 @@ function App() {
       mediaRecorderRef.current.start();
       setIsRecording(true);
     } catch (err) {
-      setError("Failed to start screen recording: " + err.message);
+      console.log("Failed to start screen recording: " + err.message);
     }
   };
 
