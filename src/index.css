@@ -1,6 +1,13 @@
+/* Import Lugrasimo font */
+@import url("https://fonts.googleapis.com/css2?family=Lugrasimo&display=swap");
+
+* {
+  font-family: "Lugrasimo", sans-serif;
+}
+
 /* General Styles */
 body {
-  font-family: "Poppins", sans-serif;
+  font-family: "Lugrasimo", sans-serif;
   background: #ffffff;
   color: #333;
   text-align: center;
@@ -66,10 +73,11 @@ h3 {
   color: rgb(223, 14, 223);
   font-weight: bold;
   text-decoration: none;
+  font-size: 18px;
 }
 
 .download-link:hover {
-  color: #2e7d32;
+  color: rgb(178, 1, 178);
 }
 
 /* Error Message */
