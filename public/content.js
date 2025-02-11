@@ -1,3 +1,5 @@
+//content.js
+
 /* global chrome */
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {

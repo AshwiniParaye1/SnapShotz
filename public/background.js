@@ -1,3 +1,5 @@
+//background.js
+
 /* global chrome */
 
 let mediaRecorder;
