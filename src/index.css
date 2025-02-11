@@ -292,6 +292,7 @@ body {
   background: none;
   border: none;
   transition: transform 0.3s ease-in-out;
+  cursor: pointer;
 }
 
 .download-link:hover {
