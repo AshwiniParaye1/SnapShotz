@@ -4,46 +4,76 @@
 
 let mediaRecorder;
 let recordedChunks = [];
-let stream;
 let isRecording = false;
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === "start_recording") {
-    chrome.tabCapture.capture(
-      { video: true, audio: false },
-      (capturedStream) => {
-        if (chrome.runtime.lastError || !capturedStream) {
-          sendResponse({
-            error: chrome.runtime.lastError?.message || "Failed to capture tab"
-          });
-          return;
-        }
+  if (message.action === "request_screen_recording") {
+    // Step 1: Get the active tab
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (!tabs.length) {
+        sendResponse({ error: "No active tab found." });
+        return;
+      }
 
-        stream = capturedStream;
+      const tab = tabs[0];
+
+      // Step 2: Open permission window in a valid tab context
+      chrome.desktopCapture.chooseDesktopMedia(
+        ["screen", "window", "tab"],
+        tab,
+        (streamId) => {
+          if (!streamId) {
+            sendResponse({ error: "Permission denied or no screen selected." });
+            return;
+          }
+
+          // Step 3: Send the streamId back to start recording
+          chrome.runtime.sendMessage({ action: "start_recording", streamId });
+        }
+      );
+    });
+
+    return true; // Keep the message channel open for async response
+  }
+
+  if (message.action === "start_recording") {
+    navigator.mediaDevices
+      .getUserMedia({
+        video: {
+          mandatory: {
+            chromeMediaSource: "desktop",
+            chromeMediaSourceId: message.streamId
+          }
+        }
+      })
+      .then((stream) => {
         recordedChunks = [];
         mediaRecorder = new MediaRecorder(stream, {
           mimeType: "video/webm; codecs=vp9"
         });
 
         mediaRecorder.ondataavailable = (event) => {
-          if (event.data.size > 0) {
-            recordedChunks.push(event.data);
-          }
+          if (event.data.size > 0) recordedChunks.push(event.data);
         };
 
         mediaRecorder.onstop = () => {
           const blob = new Blob(recordedChunks, { type: "video/webm" });
           const url = URL.createObjectURL(blob);
           chrome.storage.local.set({ recordedVideoUrl: url });
+          chrome.runtime.sendMessage({
+            action: "recording_stopped",
+            videoUrl: url
+          });
         };
 
         mediaRecorder.start();
         isRecording = true;
-        sendResponse({ success: true });
-      }
-    );
-
-    return true; // Keep the message channel open
+      })
+      .catch((error) => {
+        console.error("Error capturing screen:", error);
+        sendResponse({ error: error.message });
+      });
+    return true;
   }
 
   if (message.action === "stop_recording") {

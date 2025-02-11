@@ -1,8 +1,8 @@
+/* eslint-disable no-undef */
 //app.jsx
 
-/* eslint-disable no-unused-vars */
 /* global chrome */
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 
 function App() {
   const [screenshot, setScreenshot] = useState(null);
@@ -12,8 +12,15 @@ function App() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const canvasRef = useRef(null);
-  const mediaRecorderRef = useRef(null);
-  const recordedChunksRef = useRef([]);
+
+  useEffect(() => {
+    // Listen for messages from background.js
+    chrome.runtime.onMessage.addListener((message) => {
+      if (message.action === "recording_stopped" && message.videoUrl) {
+        setRecordedVideo(message.videoUrl);
+      }
+    });
+  }, []);
 
   const playClickSound = () => {
     const audio = new Audio("/sounds/click.mp3");
@@ -49,48 +56,25 @@ function App() {
     }
   };
 
-  const startScreenRecording = async () => {
+  const startScreenRecording = () => {
     playClickSound();
-    try {
-      const stream = await navigator.mediaDevices.getDisplayMedia({
-        video: true,
-        audio: true
-      });
-
-      mediaRecorderRef.current = new MediaRecorder(stream);
-      recordedChunksRef.current = [];
-
-      mediaRecorderRef.current.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          recordedChunksRef.current.push(event.data);
+    chrome.runtime.sendMessage(
+      { action: "request_screen_recording" },
+      (response) => {
+        if (response.error) {
+          console.error("Error:", response.error);
         }
-      };
-
-      mediaRecorderRef.current.onstop = () => {
-        const blob = new Blob(recordedChunksRef.current, {
-          type: "video/webm"
-        });
-        const videoUrl = URL.createObjectURL(blob);
-        setRecordedVideo(videoUrl);
-        stream.getTracks().forEach((track) => track.stop());
-      };
-
-      mediaRecorderRef.current.start();
-      setIsRecording(true);
-    } catch (err) {
-      console.log("Failed to start screen recording: " + err.message);
-    }
+      }
+    );
   };
 
   const stopScreenRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
+    chrome.runtime.sendMessage({ action: "stop_recording" }, (response) => {
+      if (response?.error) {
+        setError(response.error);
+      }
       setIsRecording(false);
-    }
-  };
-
-  const applyOverlay = (imageUrl) => {
-    // ... (previous overlay code remains the same)
+    });
   };
 
   return (
@@ -167,7 +151,7 @@ function App() {
           <video src={recordedVideo} controls className="recorded-video" />
           <a
             href={recordedVideo}
-            download="screen-recording.mp4"
+            download="screen-recording.webm"
             className="download-link"
           >
             Download Recording
