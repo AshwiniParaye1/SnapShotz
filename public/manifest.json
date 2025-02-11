@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "SnapShotz",
   "version": "1.1",
-  "description": "Capture screenshots and screen recordings",
+  "description": "Capture screenshots with ease",
   "permissions": [
     "activeTab",
     "scripting",
