@@ -12,6 +12,16 @@ SnapShotz is a simple and efficient Chrome extension that lets you capture any w
 
 ---
 
+## Technologies Used
+
+```bash
+- Manifest v3 (Chrome Extensions API)
+- React + Vite (UI Development)
+- JavaScript (Core functionality)
+```
+
+---
+
 ## Installation
 
 #### 1. Clone the Repository
@@ -49,6 +59,8 @@ npm run build
 - Find SnapShotz and click the 📌 pin icon to keep it visible.
 ```
 
+---
+
 ## Usage
 
 ```bash
@@ -57,13 +69,7 @@ npm run build
 - Copy or download the screenshot instantly!
 ```
 
-## Technologies Used
-
-```bash
-- Manifest v3 (Chrome Extensions API)
-- React + Vite (UI Development)
-- JavaScript (Core functionality)
-```
+---
 
 ### Thank you for checking out **_SnapShotz!_** If you have any questions or feedback, feel free to reach out.
 
