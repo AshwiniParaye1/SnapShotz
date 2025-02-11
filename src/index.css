@@ -2,6 +2,10 @@
 
 @import url("https://fonts.googleapis.com/css2?family=Lugrasimo&display=swap");
 
+* {
+  font-family: "Lugrasimo", sans-serif;
+}
+
 body {
   font-family: "Lugrasimo", sans-serif;
   text-align: center;
@@ -285,6 +289,8 @@ body {
   color: rgb(219, 25, 219);
   font-weight: bold;
   font-size: 18px;
+  background: none;
+  border: none;
 }
 
 .download-link:hover {

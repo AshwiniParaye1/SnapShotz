@@ -12,4 +12,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     return true; // Keep the message channel open for async response
   }
+
+  if (message.action === "get_page_info") {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs.length === 0 || !tabs[0].title) {
+        sendResponse({ error: "Failed to get page title." });
+      } else {
+        sendResponse({ title: tabs[0].title });
+      }
+    });
+
+    return true;
+  }
 });
