@@ -1,5 +1,3 @@
-//background.js
-
 /* global chrome */
 
 let mediaRecorder;
@@ -18,6 +16,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     return true; // Keep the message channel open for async response
   }
+
   if (message.action === "request_screen_recording") {
     // Step 1: Get the active tab
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -25,9 +24,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         sendResponse({ error: "No active tab found." });
         return;
       }
-
       const tab = tabs[0];
-
       // Step 2: Open permission window in a valid tab context
       chrome.desktopCapture.chooseDesktopMedia(
         ["screen", "window", "tab"],
@@ -37,13 +34,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             sendResponse({ error: "Permission denied or no screen selected." });
             return;
           }
-
           // Step 3: Send the streamId back to start recording
           chrome.runtime.sendMessage({ action: "start_recording", streamId });
         }
       );
     });
-
     return true; // Keep the message channel open for async response
   }
 

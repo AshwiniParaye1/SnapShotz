@@ -1,7 +1,5 @@
-//app.jsx
-
 /* global chrome */
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 function App() {
   const [screenshot, setScreenshot] = useState(null);
@@ -11,15 +9,8 @@ function App() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const canvasRef = useRef(null);
-
-  useEffect(() => {
-    // Listen for messages from background.js
-    chrome.runtime.onMessage.addListener((message) => {
-      if (message.action === "recording_stopped" && message.videoUrl) {
-        setRecordedVideo(message.videoUrl);
-      }
-    });
-  }, []);
+  // const mediaRecorderRef = useRef(null);
+  // const recordedChunksRef = useRef([]);
 
   const playClickSound = () => {
     const audio = new Audio("/sounds/click.mp3");
@@ -33,18 +24,24 @@ function App() {
       setError(null);
       setIsLoading(true);
 
-      chrome.runtime.sendMessage({ action: "capture_visible" }, (response) => {
-        if (chrome.runtime.lastError || !response) {
-          setError("Failed to capture screenshot.");
-        } else if (response?.error) {
-          setError(response.error);
-        } else if (response?.screenshotUrl) {
-          setScreenshot(response.screenshotUrl);
-        }
-        setIsLoading(false);
+      const response = await new Promise((resolve) => {
+        chrome.runtime.sendMessage({ action: "capture_visible" }, resolve);
       });
+
+      if (response?.error) {
+        setError(response.error);
+      } else if (response?.screenshotUrl) {
+        setScreenshot(response.screenshotUrl);
+        const img = new Image();
+        img.crossOrigin = "Anonymous";
+        img.src = response.screenshotUrl;
+        img.onload = () => {
+          applyOverlay(response.screenshotUrl);
+        };
+      }
     } catch (err) {
       setError(err.message);
+    } finally {
       setIsLoading(false);
     }
   };
@@ -69,6 +66,60 @@ function App() {
       setIsRecording(false);
     });
   };
+
+  const applyOverlay = (imageUrl) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    const img = new Image();
+    img.crossOrigin = "Anonymous"; // Prevents CORS issues
+    img.src = imageUrl;
+    img.onload = () => {
+      const padding = 20; // Padding around the screenshot
+      const headerHeight = 40;
+      // Set canvas dimensions correctly
+      canvas.width = img.width + padding * 2;
+      canvas.height = img.height + headerHeight + padding * 2;
+      // Clear canvas before drawing
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Set background color based on theme
+      ctx.fillStyle = isDarkMode ? "#2b2b2b" : "#f3f3f3";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // Draw header with control dots
+      ctx.fillStyle = isDarkMode ? "#444" : "#ddd";
+      ctx.fillRect(padding, padding, img.width, headerHeight);
+      // Draw control dots (Mac-style window controls)
+      const dotY = padding + headerHeight / 2;
+      const dotSpacing = 20;
+      const colors = ["#ff5f57", "#ffbd2e", "#28c840"]; // Red, Yellow, Green
+      colors.forEach((color, index) => {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(padding + dotSpacing * (index + 1), dotY, 6, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Draw the screenshot below the header with padding
+      ctx.drawImage(img, padding, padding + headerHeight);
+
+      // Update the screenshot preview with the new image
+      setScreenshot(canvas.toDataURL("image/png"));
+    };
+
+    img.onerror = () => {
+      console.error("Failed to load image for overlay.");
+      setError("Failed to apply overlay. Try again.");
+    };
+  };
+
+  useEffect(() => {
+    // Listen for messages from background.js
+    chrome.runtime.onMessage.addListener((message) => {
+      if (message.action === "recording_stopped" && message.videoUrl) {
+        setRecordedVideo(message.videoUrl);
+      }
+    });
+  }, []);
 
   return (
     <div className={`container ${isDarkMode ? "dark-mode" : "light-mode"}`}>
@@ -100,7 +151,6 @@ function App() {
             className="icon-img"
           />
         </button>
-
         {!isRecording ? (
           <button onClick={startScreenRecording} className="icon-button">
             <img
@@ -138,13 +188,12 @@ function App() {
           </a>
         </div>
       )}
-
       {recordedVideo && (
         <div className="video-preview">
           <video src={recordedVideo} controls className="recorded-video" />
           <a
             href={recordedVideo}
-            download="screen-recording.webm"
+            download="screen-recording.mp4"
             className="download-link"
           >
             Download Recording
