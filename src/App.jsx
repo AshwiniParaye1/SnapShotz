@@ -1,16 +1,13 @@
 /* global chrome */
-import { useState, useRef, useEffect } from "react";
+
+import { useState, useRef } from "react";
 
 function App() {
   const [screenshot, setScreenshot] = useState(null);
-  // const [recordedVideo, setRecordedVideo] = useState(null); // Commented out
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  // const [isRecording, setIsRecording] = useState(false); // Commented out
   const canvasRef = useRef(null);
-  // const mediaRecorderRef = useRef(null);
-  // const recordedChunksRef = useRef([]);
 
   const playClickSound = () => {
     const audio = new Audio("/sounds/click.mp3");
@@ -45,30 +42,6 @@ function App() {
       setIsLoading(false);
     }
   };
-
-  // Commented out recording functions
-  /*
-  const startScreenRecording = () => {
-    playClickSound();
-    chrome.runtime.sendMessage(
-      { action: "request_screen_recording" },
-      (response) => {
-        if (response.error) {
-          console.error("Error:", response.error);
-        }
-      }
-    );
-  };
-
-  const stopScreenRecording = () => {
-    chrome.runtime.sendMessage({ action: "stop_recording" }, (response) => {
-      if (response?.error) {
-        setError(response.error);
-      }
-      setIsRecording(false);
-    });
-  };
-  */
 
   const applyOverlay = (imageUrl) => {
     const canvas = canvasRef.current;
@@ -115,17 +88,6 @@ function App() {
     };
   };
 
-  useEffect(() => {
-    // Listen for messages from background.js (Commented out since recording is disabled)
-    /*
-    chrome.runtime.onMessage.addListener((message) => {
-      if (message.action === "recording_stopped" && message.videoUrl) {
-        setRecordedVideo(message.videoUrl);
-      }
-    });
-    */
-  }, []);
-
   return (
     <div className={`container ${isDarkMode ? "dark-mode" : "light-mode"}`}>
       <div className="header">
@@ -156,30 +118,6 @@ function App() {
             className="icon-img"
           />
         </button>
-
-        {/* Commented out video recording buttons */}
-        {/*
-        {!isRecording ? (
-          <button onClick={startScreenRecording} className="icon-button">
-            <img
-              src="/icons/video.png"
-              alt="Start Recording"
-              className="icon-img"
-            />
-          </button>
-        ) : (
-          <button
-            onClick={stopScreenRecording}
-            className="icon-button stop-recording"
-          >
-            <img
-              src="/icons/video.png"
-              alt="Stop Recording"
-              className="icon-img"
-            />
-          </button>
-        )}
-        */}
       </div>
 
       {error && <p className="error-text">{error}</p>}
@@ -197,22 +135,6 @@ function App() {
           </a>
         </div>
       )}
-
-      {/* Commented out recorded video preview */}
-      {/*
-      {recordedVideo && (
-        <div className="video-preview">
-          <video src={recordedVideo} controls className="recorded-video" />
-          <a
-            href={recordedVideo}
-            download="screen-recording.mp4"
-            className="download-link"
-          >
-            Download Recording
-          </a>
-        </div>
-      )}
-      */}
     </div>
   );
 }
