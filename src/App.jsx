@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 //app.jsx
 
 /* global chrome */
@@ -34,24 +33,18 @@ function App() {
       setError(null);
       setIsLoading(true);
 
-      const response = await new Promise((resolve) => {
-        chrome.runtime.sendMessage({ action: "capture_visible" }, resolve);
+      chrome.runtime.sendMessage({ action: "capture_visible" }, (response) => {
+        if (chrome.runtime.lastError || !response) {
+          setError("Failed to capture screenshot.");
+        } else if (response?.error) {
+          setError(response.error);
+        } else if (response?.screenshotUrl) {
+          setScreenshot(response.screenshotUrl);
+        }
+        setIsLoading(false);
       });
-
-      if (response?.error) {
-        setError(response.error);
-      } else if (response?.screenshotUrl) {
-        setScreenshot(response.screenshotUrl);
-        const img = new Image();
-        img.crossOrigin = "Anonymous";
-        img.src = response.screenshotUrl;
-        img.onload = () => {
-          applyOverlay(response.screenshotUrl);
-        };
-      }
     } catch (err) {
       setError(err.message);
-    } finally {
       setIsLoading(false);
     }
   };
