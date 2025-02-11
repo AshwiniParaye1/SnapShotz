@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* global chrome */
 
 import { useState, useRef } from "react";
@@ -7,6 +8,7 @@ function App() {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [shareLink, setShareLink] = useState(""); // New State
   const canvasRef = useRef(null);
 
   const playClickSound = () => {
@@ -94,6 +96,8 @@ function App() {
   };
 
   const downloadScreenshot = async () => {
+    playClickSound();
+
     if (!screenshot) return;
 
     try {
@@ -116,6 +120,21 @@ function App() {
       document.body.removeChild(link);
     } catch (err) {
       setError("Failed to fetch page info.", err);
+    }
+  };
+
+  const copyToClipboard = async () => {
+    playClickSound();
+
+    if (!screenshot) return;
+
+    try {
+      const blob = await fetch(screenshot).then((res) => res.blob());
+      const clipboardItem = new ClipboardItem({ "image/png": blob });
+      await navigator.clipboard.write([clipboardItem]);
+      alert("Screenshot copied to clipboard!");
+    } catch (err) {
+      setError("Failed to copy screenshot.");
     }
   };
 
@@ -157,9 +176,24 @@ function App() {
         <div className="screenshot-preview">
           <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
           <img src={screenshot} alt="Screenshot" className="screenshot-img" />
-          <button onClick={downloadScreenshot} className="download-link">
-            Download
-          </button>
+
+          <div className="copy-download-btn">
+            <button onClick={copyToClipboard} className="copy-button">
+              <img
+                src="/icons/copy.png"
+                alt="Capture Screenshot"
+                className="copy-icon-img"
+              />
+            </button>
+
+            <button onClick={downloadScreenshot} className="download-link">
+              <img
+                src="/icons/download.png"
+                alt="Capture Screenshot"
+                className="download-icon-img"
+              />
+            </button>
+          </div>
         </div>
       )}
     </div>

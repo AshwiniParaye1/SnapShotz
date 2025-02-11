@@ -291,8 +291,38 @@ body {
   font-size: 18px;
   background: none;
   border: none;
+  transition: transform 0.3s ease-in-out;
 }
 
 .download-link:hover {
-  text-decoration: underline;
+  transform: scale(1.2);
+}
+
+.copy-button {
+  display: block;
+  margin-top: 10px;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.3s ease-in-out;
+}
+
+.copy-button:hover {
+  transform: scale(1.2);
+}
+
+.copy-download-btn {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.copy-icon-img,
+.download-icon-img {
+  width: 25px;
+  height: 25px;
+  transition: transform 0.3s ease-in-out;
 }
