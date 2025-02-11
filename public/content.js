@@ -2,6 +2,8 @@
 
 /* global chrome */
 
+//TODO - work on screen recording in new tab
+
 let mediaRecorder;
 let recordedChunks = [];
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
